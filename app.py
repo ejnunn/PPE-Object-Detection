@@ -93,20 +93,19 @@ def run_the_app():
     # This function uses some Pandas magic to summarize the metadata Dataframe.
     @st.cache
     def create_summary(metadata):
-        one_hot_encoded = pd.get_dummies(metadata[["frame", "label"]], columns=["label"])
-        summary = one_hot_encoded.groupby(["frame"]).sum().rename(columns={
-            "label_biker": "biker",
-            "label_car": "car",
-            "label_pedestrian": "pedestrian",
-            "label_trafficLight": "traffic light",
-            "label_truck": "truck"
+        st.write(metadata.columns)
+        one_hot_encoded = pd.get_dummies(metadata[["image", "label"]], columns=["label"])
+        summary = one_hot_encoded.groupby(["image"]).sum().rename(columns={
+            "label_safetyVest": "safetyVest",
+            "label_hardHat": "hardHat",
+            "label_person": "person"
         })
         return summary
 
     # An amazing property of st.cached functions is that you can pipe them into
     # one another to form a computation DAG (directed acyclic graph). Streamlit
     # recomputes only whatever subset is required to get the right answer!
-    metadata = load_metadata(os.path.join(DATA_URL_ROOT, "labels.csv.gz"))
+    metadata = load_metadata(os.path.join(DATA_URL_ROOT, "labels.csv"))
     summary = create_summary(metadata)
 
     # Uncomment these lines to peek at these DataFrames.
@@ -126,9 +125,9 @@ def run_the_app():
     image = load_image(image_url)
 
     # Add boxes for objects on the image. These are the boxes for the ground image.
-    boxes = metadata[metadata.frame == selected_frame].drop(columns=["frame"])
+    boxes = metadata[metadata.frame == selected_frame].drop(columns=["image"])
     draw_image_with_boxes(image, boxes, "Ground Truth",
-        "**Human-annotated data** (frame `%i`)" % selected_frame_index)
+        "**Human-annotated data** (image `%i`)" % selected_frame_index)
 
     # Get the boxes for the objects detected by YOLO by running the YOLO model.
     yolo_boxes = yolo_v3(image, confidence_threshold, overlap_threshold)
@@ -249,8 +248,8 @@ def yolo_v3(image, confidence_threshold, overlap_threshold):
 
     # Map from YOLO labels to PPE labels.
     PPE_LABELS = {
-        0: 'hard hat',
-        1: 'safety vest',
+        0: 'hardHat',
+        1: 'safetyVest',
         2: 'person'
     }
     label, xmin, ymin, xmax, ymin = [], [], [], [], []
@@ -275,7 +274,7 @@ def yolo_v3(image, confidence_threshold, overlap_threshold):
 
 
 # Path to the Streamlit public S3 bucket
-DATA_URL_ROOT = "https://streamlit-self-driving.s3-us-west-2.amazonaws.com/"
+DATA_URL_ROOT = "~/Desktop/GitHub Projects/Streamlit-App/PPE-Object-Detection/"
 
 # External files to download.
 EXTERNAL_DEPENDENCIES = {
