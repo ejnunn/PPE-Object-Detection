@@ -93,7 +93,6 @@ def run_the_app():
     # This function uses some Pandas magic to summarize the metadata Dataframe.
     @st.cache
     def create_summary(metadata):
-        st.write(metadata.columns)
         one_hot_encoded = pd.get_dummies(metadata[["image", "label"]], columns=["label"])
         summary = one_hot_encoded.groupby(["image"]).sum().rename(columns={
             "label_safetyVest": "safetyVest",
@@ -109,7 +108,7 @@ def run_the_app():
     summary = create_summary(metadata)
 
     # Uncomment these lines to peek at these DataFrames.
-    st.write('## Metadata', metadata[:1000], '## Summary', summary[:1000])
+    #st.write('## Metadata', metadata[:1000], '## Summary', summary[:1000])
 
     # Draw the UI elements to search for objects (pedestrians, cars, etc.)
     selected_frame_index, selected_frame = frame_selector_ui(summary)
@@ -120,12 +119,11 @@ def run_the_app():
     # Draw the UI element to select parameters for the YOLO object detector.
     confidence_threshold, overlap_threshold = object_detector_ui()
 
-    # Load the image from S3.
-    image_url = os.path.join(DATA_URL_ROOT, selected_frame)
+    # Load the image from file.
+    image_url = os.path.join(DATA_URL_ROOT + 'images/', selected_frame)
     image = load_image(image_url)
-
     # Add boxes for objects on the image. These are the boxes for the ground image.
-    boxes = metadata[metadata.frame == selected_frame].drop(columns=["image"])
+    boxes = metadata[metadata.image == selected_frame].drop(columns=["image"])
     draw_image_with_boxes(image, boxes, "Ground Truth",
         "**Human-annotated data** (image `%i`)" % selected_frame_index)
 
@@ -142,13 +140,13 @@ def frame_selector_ui(summary):
     object_type = st.sidebar.selectbox("Search for which objects?", summary.columns, 2)
 
     # The user can select a range for how many of the selected objecgt should be present.
-    min_elts, max_elts = st.sidebar.slider("How many %ss (select a range)?" % object_type, 0, 25, [10, 20])
+    min_elts, max_elts = st.sidebar.slider("How many %ss (select a range)?" % object_type, 0, 10, [0, 10])
     selected_frames = get_selected_frames(summary, object_type, min_elts, max_elts)
     if len(selected_frames) < 1:
         return None, None
 
     # Choose a frame out of the selected frames.
-    selected_frame_index = st.sidebar.slider("Choose a frame (index)", 0, len(selected_frames) - 1, 0)
+    selected_frame_index = st.sidebar.slider("Choose an image (index)", 0, len(selected_frames) - 1, 0)
 
     # Draw an altair chart in the sidebar with information on the frame.
     objects_per_frame = summary.loc[selected_frames, object_type].reset_index(drop=True).reset_index()
@@ -180,14 +178,12 @@ def object_detector_ui():
 def draw_image_with_boxes(image, boxes, header, description):
     # Superpose the semi-transparent object detection boxes.    # Colors for the boxes
     LABEL_COLORS = {
-        "car": [255, 0, 0],
-        "pedestrian": [0, 255, 0],
-        "truck": [0, 0, 255],
-        "trafficLight": [255, 255, 0],
-        "biker": [255, 0, 255],
+        "safetyVest": [255, 0, 0],
+        "hardHat": [0, 255, 0],
+        "person": [0, 0, 255]
     }
     image_with_boxes = image.astype(np.float64)
-    for _, (label, xmin, ymin, xmax, ymin) in boxes.iterrows():
+    for _, (label, xmin, ymin, xmax, ymax) in boxes.iterrows():
         image_with_boxes[int(ymin):int(ymax),int(xmin):int(xmax),:] += LABEL_COLORS[label]
         image_with_boxes[int(ymin):int(ymax),int(xmin):int(xmax),:] /= 2
 
@@ -206,10 +202,9 @@ def get_file_content_as_string(path):
 # This function loads an image from Streamlit public repo on S3. We use st.cache on this
 # function as well, so we can reuse the images across runs.
 @st.cache(show_spinner=False)
-def load_image(url):
-    with urllib.request.urlopen(url) as response:
-        image = np.asarray(bytearray(response.read()), dtype="uint8")
-    image = cv2.imdecode(image, cv2.IMREAD_COLOR)
+def load_image(path):
+    image = cv2.imread(path)
+    #image = cv2.imdecode(image, cv2.IMREAD_COLOR)
     image = image[:, :, [2, 1, 0]] # BGR -> RGB
     return image
 
@@ -252,7 +247,7 @@ def yolo_v3(image, confidence_threshold, overlap_threshold):
         1: 'safetyVest',
         2: 'person'
     }
-    label, xmin, ymin, xmax, ymin = [], [], [], [], []
+    labels, xmin, ymin, xmax, ymax = [], [], [], [], []
     if len(indices) > 0:
         # loop over the indexes we are keeping
         for i in indices.flatten():
@@ -274,7 +269,7 @@ def yolo_v3(image, confidence_threshold, overlap_threshold):
 
 
 # Path to the Streamlit public S3 bucket
-DATA_URL_ROOT = "~/Desktop/GitHub Projects/Streamlit-App/PPE-Object-Detection/"
+DATA_URL_ROOT = "./ppe_data/"
 
 # External files to download.
 EXTERNAL_DEPENDENCIES = {
