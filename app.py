@@ -13,8 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# This demo lets you to explore the Udacity self-driving car image dataset.
-# More info: https://github.com/streamlit/demo-self-driving
+# More info: https://github.com/ejnunn/PPE-Object-Detection
 
 import streamlit as st
 import altair as alt
@@ -144,7 +143,7 @@ def frame_selector_ui(summary):
     object_type = st.sidebar.selectbox("Search for which objects?", summary.columns, 2)
 
     # The user can select a range for how many of the selected objecgt should be present.
-    min_elts, max_elts = st.sidebar.slider("How many %ss (select a range)?" % object_type, 0, 10, [0, 10])
+    min_elts, max_elts = st.sidebar.slider("How many %ss (select a range)?" % object_type, 0, 15, [1, 10])
     selected_frames = get_selected_frames(summary, object_type, min_elts, max_elts)
     if len(selected_frames) < 1:
         return None, None
@@ -199,7 +198,7 @@ def draw_image_with_boxes(image, boxes, header, description):
 # Download a single file and make its content available as a string.
 @st.cache(show_spinner=False)
 def get_file_content_as_string(path):
-    url = 'https://raw.githubusercontent.com/streamlit/demo-self-driving/master/' + path
+    url = 'https://raw.githubusercontent.com/ejnunn/PPE-Object-Detection/master/' + path
     response = urllib.request.urlopen(url)
     return response.read().decode("utf-8")
 
