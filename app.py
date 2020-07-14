@@ -104,11 +104,15 @@ def run_the_app():
     # An amazing property of st.cached functions is that you can pipe them into
     # one another to form a computation DAG (directed acyclic graph). Streamlit
     # recomputes only whatever subset is required to get the right answer!
-    metadata = load_metadata(os.path.join(DATA_URL_ROOT, "labels.csv"))
+    metadata = load_metadata("labels.csv")
     summary = create_summary(metadata)
 
+    display_metadata = st.sidebar.checkbox('Show metadata and summary')
     # Uncomment these lines to peek at these DataFrames.
-    #st.write('## Metadata', metadata[:1000], '## Summary', summary[:1000])
+    if display_metadata:
+        display_metadata_state = st.write('## Metadata', metadata[:1000], '## Summary', summary[:1000])
+    else:
+        display_metadata_state = st.write()
 
     # Draw the UI elements to search for objects (pedestrians, cars, etc.)
     selected_frame_index, selected_frame = frame_selector_ui(summary)
@@ -195,7 +199,7 @@ def draw_image_with_boxes(image, boxes, header, description):
 # Download a single file and make its content available as a string.
 @st.cache(show_spinner=False)
 def get_file_content_as_string(path):
-    url = 'https://raw.githubusercontent.com/streamlit/demo-self-driving/master/' + path
+    url = 'https://raw.githubusercontent.com/ejnunn/PPE-Object-Detection/master/' + path
     response = urllib.request.urlopen(url)
     return response.read().decode("utf-8")
 
@@ -204,7 +208,6 @@ def get_file_content_as_string(path):
 @st.cache(show_spinner=False)
 def load_image(path):
     image = cv2.imread(path)
-    #image = cv2.imdecode(image, cv2.IMREAD_COLOR)
     image = image[:, :, [2, 1, 0]] # BGR -> RGB
     return image
 
