@@ -284,7 +284,7 @@ EXTERNAL_DEPENDENCIES = {
         "size": 8342
     },
     "yolov3-ppe.cfg": {
-        "url": None,
+        "url": "https://raw.githubusercontent.com/ejnunn/PPE-Object-Detection/master/yolov3-ppe.cfg",
         "size": 8336
     }
 }
