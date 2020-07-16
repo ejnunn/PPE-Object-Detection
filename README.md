@@ -1,6 +1,6 @@
-# Streamlit Demo: Personal Protective Equipment, Object Detection Image Browser
+# Streamlit Web App: Personal Protective Equipment, Object Detection Image Browser
 
-This project demonstrates the [YOLO object detection](https://pjreddie.com/darknet/yolo) using a custom dataset of images containing different types of personal protective equipment into an interactive [Streamlit](https://streamlit.io) app.
+This project implements the [YOLO object detection CNN](https://pjreddie.com/darknet/yolo) using a custom dataset of images containing different types of personal protective equipment into an interactive [Streamlit](https://streamlit.io) app.
 
 The complete demo is [implemented in less than 300 lines of Python](https://github.com/ejnunn/PPE-Object-Detection/blob/master/app.py) and illustrates all the major building blocks of Streamlit.
 
