@@ -106,7 +106,10 @@ def run_the_app():
     metadata = load_metadata("labels.csv")
     summary = create_summary(metadata)
 
+    # sidebar widgets
     display_metadata = st.sidebar.checkbox('Show metadata and summary')
+    display_boxes = st.sidebar.checkbox('Show bounding box coordinates') 
+
     # Uncomment these lines to peek at these DataFrames.
     if display_metadata:
         display_metadata_state = st.write('## Metadata', metadata[:1000], '## Summary', summary[:1000])
@@ -127,7 +130,8 @@ def run_the_app():
     image = load_image(image_url)
     # Add boxes for objects on the image. These are the boxes for the ground image.
     boxes = metadata[metadata['image'] == selected_frame].drop(columns=["image"])
-    st.write(boxes)
+    if display_boxes:
+        st.write(boxes)
     draw_image_with_boxes(image, boxes, "Ground Truth",
         "**Human-annotated data** (image `%i`)" % selected_frame_index)
 
@@ -182,12 +186,12 @@ def object_detector_ui():
 def draw_image_with_boxes(image, boxes, header, description):
     # Superpose the semi-transparent object detection boxes.    # Colors for the boxes
     LABEL_COLORS = {
-        "safetyVest": [255, 0, 0],
-        "hardHat": [0, 255, 0],
-        "person": [0, 0, 255]
+        "safetyVest": [255, 0, 0],  # red
+        "hardHat": [0, 255, 0],     # green
+        "person": [0, 0, 255]       # blue
     }
     image_with_boxes = image.astype(np.float64)
-    for _, (label, xmin, ymin, xmax, ymax) in boxes.iterrows():
+    for _, (label, xmin, xmax, ymin, ymax) in boxes.iterrows():
         image_with_boxes[int(ymin):int(ymax),int(xmin):int(xmax),:] += LABEL_COLORS[label]
         image_with_boxes[int(ymin):int(ymax),int(xmin):int(xmax),:] /= 2
 
