@@ -126,7 +126,8 @@ def run_the_app():
     image_url = os.path.join(DATA_URL_ROOT + 'images/', selected_frame)
     image = load_image(image_url)
     # Add boxes for objects on the image. These are the boxes for the ground image.
-    boxes = metadata[metadata.image == selected_frame].drop(columns=["image"])
+    boxes = metadata[metadata['image'] == selected_frame].drop(columns=["image"])
+    st.write(boxes)
     draw_image_with_boxes(image, boxes, "Ground Truth",
         "**Human-annotated data** (image `%i`)" % selected_frame_index)
 
@@ -177,7 +178,7 @@ def object_detector_ui():
     overlap_threshold = st.sidebar.slider("Overlap threshold", 0.0, 1.0, 0.3, 0.01)
     return confidence_threshold, overlap_threshold
 
-# Draws an image with boxes overlayed to indicate the presence of cars, pedestrians etc.
+# Draws an image with boxes overlayed to indicate the presence of PPE, people etc.
 def draw_image_with_boxes(image, boxes, header, description):
     # Superpose the semi-transparent object detection boxes.    # Colors for the boxes
     LABEL_COLORS = {
@@ -202,8 +203,8 @@ def get_file_content_as_string(path):
     response = urllib.request.urlopen(url)
     return response.read().decode("utf-8")
 
-# This function loads an image from Streamlit public repo on S3. We use st.cache on this
-# function as well, so we can reuse the images across runs.
+# This function loads an image from local storage. Use st.cache on this
+# function as well, so you can reuse the images across runs.
 @st.cache(show_spinner=False)
 def load_image(path):
     image = cv2.imread(path)
