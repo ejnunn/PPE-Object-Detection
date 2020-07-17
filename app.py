@@ -106,21 +106,13 @@ def run_the_app():
     metadata = load_metadata("labels.csv")
     summary = create_summary(metadata)
 
-    # sidebar widgets
-    display_metadata = st.sidebar.checkbox('Show metadata and summary')
-    display_boxes = st.sidebar.checkbox('Show bounding box coordinates') 
-
-    # Uncomment these lines to peek at these DataFrames.
-    if display_metadata:
-        display_metadata_state = st.write('## Metadata', metadata[:1000], '## Summary', summary[:1000])
-    else:
-        display_metadata_state = st.write()
-
     # Draw the UI elements to search for objects (pedestrians, cars, etc.)
     selected_frame_index, selected_frame = frame_selector_ui(summary)
     if selected_frame_index == None:
         st.error("No frames fit the criteria. Please select different label or number.")
         return
+    else:
+        st.write(selected_frame)
 
     # Draw the UI element to select parameters for the YOLO object detector.
     confidence_threshold, overlap_threshold = object_detector_ui()
@@ -130,8 +122,7 @@ def run_the_app():
     image = load_image(image_url)
     # Add boxes for objects on the image. These are the boxes for the ground image.
     boxes = metadata[metadata['image'] == selected_frame].drop(columns=["image"])
-    if display_boxes:
-        st.write(boxes)
+
     draw_image_with_boxes(image, boxes, "Ground Truth",
         "**Human-annotated data** (image `%i`)" % selected_frame_index)
 
@@ -140,15 +131,24 @@ def run_the_app():
     draw_image_with_boxes(image, yolo_boxes, "Real-time Computer Vision",
         "**YOLO v3 Model** (overlap `%3.1f`) (confidence `%3.1f`)" % (overlap_threshold, confidence_threshold))
 
+    # Draw the UI elements for metadata details
+    st.sidebar.subheader('Metadata Details')
+    display_metadata = st.sidebar.checkbox('Show metadata and summary')
+    display_boxes = st.sidebar.checkbox('Show bounding box coordinates') 
+    if display_metadata:
+        display_metadata_state = st.write('## Metadata', metadata[:1000], '## Summary', summary[:1000])
+    if display_boxes:
+        st.write('## Bounding Boxes', boxes)
+
 # This sidebar UI is a little search engine to find certain object types.
 def frame_selector_ui(summary):
     st.sidebar.markdown("# Frame")
 
     # The user can pick which type of object to search for.
-    object_type = st.sidebar.selectbox("Search for which objects?", summary.columns, 2)
+    object_type = st.sidebar.selectbox("Search for which objects?", summary.columns, 0)
 
     # The user can select a range for how many of the selected objecgt should be present.
-    min_elts, max_elts = st.sidebar.slider("How many %ss (select a range)?" % object_type, 0, 15, [1, 10])
+    min_elts, max_elts = st.sidebar.slider("How many %ss (select a range)?" % object_type, 0, 15, [3, 6])
     selected_frames = get_selected_frames(summary, object_type, min_elts, max_elts)
     if len(selected_frames) < 1:
         return None, None
@@ -258,7 +258,7 @@ def yolo_v3(image, confidence_threshold, overlap_threshold):
     if len(indices) > 0:
         # loop over the indexes we are keeping
         for i in indices.flatten():
-            label = UDACITY_LABELS.get(class_IDs[i], None)
+            label = PPE_LABELS.get(class_IDs[i], None)
             if label is None:
                 continue
 
