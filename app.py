@@ -227,20 +227,26 @@ def yolo_v3(image, confidence_threshold, overlap_threshold):
     net, output_layer_names = load_network("yolov3-ppe.cfg", "yolov3.weights")
 
     # Run the YOLO neural net.
-    blob = cv2.dnn.blobFromImage(image, 1 / 255.0, (416, 416), swapRB=True, crop=False)
+    blob = cv2.dnn.blobFromImage(image, 1 / 255.0, (416, 416), swapRB=True, crop=False) # 416x416 size comes from yolov3 specs
     net.setInput(blob)
     layer_outputs = net.forward(output_layer_names)
+
+    st.write('## net:', net, '## output_layer_names:', output_layer_names, '## layer_outputs:', layer_outputs)
 
     # Supress detections in case of too low confidence or too much overlap.
     boxes, confidences, class_IDs = [], [], []
     H, W = image.shape[:2]
+    # layer_outputs.shape = 3x8x507
+    # output includes columns for [xmin, xmax, ymin, ymax, confidence level, one-hot probabilities for each class]
     for output in layer_outputs:
+        st.write('## output:', output)
         for detection in output:
-            scores = detection[5:]
-            classID = np.argmax(scores)
+            scores = detection[5:]       # probability scores for each possible class
+            classID = np.argmax(scores)  # choose highest probability
             confidence = scores[classID]
+            confidence = detection[4]     # FIXME - testing, remove if not needed
             if confidence > confidence_threshold:
-                box = detection[0:4] * np.array([W, H, W, H])
+                box = detection[0:4] * np.array([W, H, W, H])   # xy coordinates
                 centerX, centerY, width, height = box.astype("int")
                 x, y = int(centerX - (width / 2)), int(centerY - (height / 2))
                 boxes.append([x, y, int(width), int(height)])
