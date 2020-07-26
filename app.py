@@ -16,10 +16,16 @@
 # More info: https://github.com/ejnunn/PPE-Object-Detection
 
 import streamlit as st
-import altair as alt
+#import altair as alt
 import pandas as pd
 import numpy as np
-import os, urllib, cv2
+import os, urllib
+import sys
+try:
+    sys.path.append('/usr/local/lib64/python3.6/site-packages')
+    import cv2
+except Exception as e:
+    print(e)
 
 # Streamlit encourages well-structured code, like starting execution in a main() function.
 def main():
