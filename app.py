@@ -32,16 +32,23 @@ def main():
 
     # Once we have the dependencies, add a selector for the app mode on the sidebar.
     st.sidebar.title("What to do")
+
+    app_modes = ["Show instructions", "Run the app", "Show the metadata", "Show the source code"]
     app_mode = st.sidebar.selectbox("Choose the app mode",
-        ["Show instructions", "Run the app", "Show the source code"])
+        app_modes)
     if app_mode == "Show instructions":
         st.sidebar.success('To continue select "Run the app".')
-    elif app_mode == "Show the source code":
-        readme_text.empty()
-        st.code(get_file_content_as_string("app.py"))
     elif app_mode == "Run the app":
         readme_text.empty()
         run_the_app()
+    elif app_mode == "Show the metadata":
+        readme_text.empty()
+        show_metadata()
+    elif app_mode == "Show the source code":
+        readme_text.empty()
+        st.code(get_file_content_as_string("app.py"))
+
+    
 
 # This file downloader demonstrates Streamlit animation.
 def download_file(file_path):
@@ -140,6 +147,9 @@ def run_the_app():
     if display_boxes:
         st.write('## Bounding Boxes', boxes)
 
+# This shows metadata dataframes to show detail of neural network's implementation details
+def show_metadata():
+    pass
 # This sidebar UI is a little search engine to find certain object types.
 def frame_selector_ui(summary):
     st.sidebar.markdown("# Frame")
@@ -188,7 +198,6 @@ def draw_image_with_boxes(image, boxes, header, description):
     LABEL_COLORS = {
         "safetyVest": [255, 0, 0],  # red
         "hardHat": [0, 255, 0],     # green
-        "person": [0, 0, 255]       # blue
     }
     image_with_boxes = image.astype(np.float64)
     for _, (label, xmin, xmax, ymin, ymax) in boxes.iterrows():
@@ -224,7 +233,7 @@ def yolo_v3(image, confidence_threshold, overlap_threshold):
         output_layer_names = net.getLayerNames()
         output_layer_names = [output_layer_names[i[0] - 1] for i in net.getUnconnectedOutLayers()]
         return net, output_layer_names
-    net, output_layer_names = load_network("yolov3-ppe.cfg", "yolov3.weights")
+    net, output_layer_names = load_network("yolov3_ppe2.cfg", "yolov3_ppe2_last.weights")
 
     # Run the YOLO neural net.
     blob = cv2.dnn.blobFromImage(image, 1 / 255.0, (416, 416), swapRB=True, crop=False) # 416x416 size comes from yolov3 specs
@@ -236,29 +245,30 @@ def yolo_v3(image, confidence_threshold, overlap_threshold):
     # Supress detections in case of too low confidence or too much overlap.
     boxes, confidences, class_IDs = [], [], []
     H, W = image.shape[:2]
+
     # layer_outputs.shape = 3x8x507
-    # output includes columns for [xmin, xmax, ymin, ymax, confidence level, one-hot probabilities for each class]
+    # output includes columns for the following:
+    #           [xmin, xmax, ymin, ymax, confidence level, one-hot probabilities for each class]
+    # each output is for progressively smaller anchor boxes (i.e. large, medium, small)
     for output in layer_outputs:
-        st.write('## output:', output)
+        st.write('## output:', output, 'xmin, xmax, ymin, ymax, confidence, class1, class2, class3, class4, class5')
         for detection in output:
             scores = detection[5:]       # probability scores for each possible class
             classID = np.argmax(scores)  # choose highest probability
             confidence = scores[classID]
-            confidence = detection[4]     # FIXME - testing, remove if not needed
+            #confidence = detection[4]     # FIXME - testing, remove if not needed
             if confidence > confidence_threshold:
-                box = detection[0:4] * np.array([W, H, W, H])   # xy coordinates
-                centerX, centerY, width, height = box.astype("int")
-                x, y = int(centerX - (width / 2)), int(centerY - (height / 2))
-                boxes.append([x, y, int(width), int(height)])
+                box = detection[0:4] * np.array([W, W, H, H])   # xy coordinates
+                xmin, xmax, ymin, ymax = box.astype('int')
+                boxes.append([xmin, xmax, ymin, ymax])
                 confidences.append(float(confidence))
                 class_IDs.append(classID)
     indices = cv2.dnn.NMSBoxes(boxes, confidences, confidence_threshold, overlap_threshold)
 
     # Map from YOLO labels to PPE labels.
     PPE_LABELS = {
-        0: 'hardHat',
-        1: 'safetyVest',
-        2: 'person'
+        0: 'Hard Hat',
+        1: 'Safety Vest'
     }
     labels, xmin, ymin, xmax, ymax = [], [], [], [], []
     if len(indices) > 0:
@@ -286,16 +296,12 @@ DATA_URL_ROOT = "./ppe_data/"
 
 # External files to download.
 EXTERNAL_DEPENDENCIES = {
-    "yolov3.weights": {
-        "url": "https://pjreddie.com/media/files/yolov3.weights",
-        "size": 248007048
-    },
-    "yolov3.cfg": {
-        "url": "https://raw.githubusercontent.com/pjreddie/darknet/master/cfg/yolov3.cfg",
-        "size": 8342
-    },
-    "yolov3-ppe.cfg": {
-        "url": "https://raw.githubusercontent.com/ejnunn/PPE-Object-Detection/master/yolov3-ppe.cfg",
+    #"yolov3_ppe2_last.weights": {
+    #    "url": "",
+    #    "size": 248007048
+    #},
+    "yolov3_ppe2.cfg": {
+        "url": "https://raw.githubusercontent.com/ejnunn/PPE-Object-Detection/master/yolov3_ppe2.cfg",
         "size": 8336
     }
 }
