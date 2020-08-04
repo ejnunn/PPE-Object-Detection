@@ -6,6 +6,8 @@ This project was created using the [Streamlit demo-self-driving](https://github.
 
 👈 **Please select _Run the App_ in the sidebar to start.**
 
+This gif shows example results when the object detection model is used on a video
+
 [](https://media1.giphy.com/media/Ih0gygtS1MdK2yDHKo/giphy.gif)
 
 Please see my [GitHub page](https://github.com/ejnunn/).
