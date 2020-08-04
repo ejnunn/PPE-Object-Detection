@@ -16,7 +16,7 @@
 # More info: https://github.com/ejnunn/PPE-Object-Detection
 
 import streamlit as st
-#import altair as alt
+import altair as alt
 import pandas as pd
 import numpy as np
 import os, urllib
@@ -100,9 +100,8 @@ def run_the_app():
     def create_summary(metadata):
         one_hot_encoded = pd.get_dummies(metadata[["image", "label"]], columns=["label"])
         summary = one_hot_encoded.groupby(["image"]).sum().rename(columns={
-            "label_safetyVest": "safetyVest",
-            "label_hardHat": "hardHat",
-            "label_person": "person"
+            "label_Hard Hat": "Hard Hat",
+            "label_Safety Vest": "Safety Vest"
         })
         return summary
 
@@ -124,7 +123,7 @@ def run_the_app():
     confidence_threshold, overlap_threshold = object_detector_ui()
 
     # Load the image from file.
-    image_url = os.path.join(DATA_URL_ROOT + 'images/', selected_frame)
+    image_url = os.path.join(DATA_URL_ROOT + 'obj/', selected_frame)
     image = load_image(image_url)
     # Add boxes for objects on the image. These are the boxes for the ground image.
     boxes = metadata[metadata['image'] == selected_frame].drop(columns=["image"])
@@ -192,9 +191,8 @@ def object_detector_ui():
 def draw_image_with_boxes(image, boxes, header, description):
     # Superpose the semi-transparent object detection boxes.    # Colors for the boxes
     LABEL_COLORS = {
-        "safetyVest": [255, 0, 0],  # red
-        "hardHat": [0, 255, 0],     # green
-        "person": [0, 0, 255]       # blue
+        "Hard Hat": [0, 255, 0],     # green
+        "Safety Vest": [255, 0, 0]  # red
     }
     image_with_boxes = image.astype(np.float64)
     for _, (label, xmin, xmax, ymin, ymax) in boxes.iterrows():
@@ -230,7 +228,7 @@ def yolo_v3(image, confidence_threshold, overlap_threshold):
         output_layer_names = net.getLayerNames()
         output_layer_names = [output_layer_names[i[0] - 1] for i in net.getUnconnectedOutLayers()]
         return net, output_layer_names
-    net, output_layer_names = load_network("yolov3-ppe.cfg", "yolov3.weights")
+    net, output_layer_names = load_network("yolov3_ppe2.cfg", "yolov3_ppe2_last.weights")
 
     # Run the YOLO neural net.
     blob = cv2.dnn.blobFromImage(image, 1 / 255.0, (416, 416), swapRB=True, crop=False)
@@ -256,9 +254,8 @@ def yolo_v3(image, confidence_threshold, overlap_threshold):
 
     # Map from YOLO labels to PPE labels.
     PPE_LABELS = {
-        0: 'hardHat',
-        1: 'safetyVest',
-        2: 'person'
+        0: 'Hard Hat',
+        1: 'Safety Vest'
     }
     labels, xmin, ymin, xmax, ymax = [], [], [], [], []
     if len(indices) > 0:
@@ -282,23 +279,23 @@ def yolo_v3(image, confidence_threshold, overlap_threshold):
 
 
 # Path to the Streamlit public S3 bucket
-DATA_URL_ROOT = "./ppe_data/"
+DATA_URL_ROOT = "./original_data/"
 
 # External files to download.
-EXTERNAL_DEPENDENCIES = {
-    "yolov3.weights": {
-        "url": "https://pjreddie.com/media/files/yolov3.weights",
-        "size": 248007048
-    },
-    "yolov3.cfg": {
-        "url": "https://raw.githubusercontent.com/pjreddie/darknet/master/cfg/yolov3.cfg",
-        "size": 8342
-    },
-    "yolov3-ppe.cfg": {
-        "url": "https://raw.githubusercontent.com/ejnunn/PPE-Object-Detection/master/yolov3-ppe.cfg",
-        "size": 8336
-    }
-}
+EXTERNAL_DEPENDENCIES = {}
+#    "yolov3.weights": {
+#        "url": "https://pjreddie.com/media/files/yolov3.weights",
+#        "size": 248007048
+#    },
+#    "yolov3.cfg": {
+#        "url": "https://raw.githubusercontent.com/pjreddie/darknet/master/cfg/yolov3.cfg",
+#        "size": 8342
+#    },
+#    "yolov3-ppe.cfg": {
+#        "url": "https://raw.githubusercontent.com/ejnunn/PPE-Object-Detection/master/yolov3-ppe.cfg",
+#        "size": 8336
+#    }
+#}
 
 if __name__ == "__main__":
     main()
