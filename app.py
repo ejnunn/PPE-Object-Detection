@@ -31,7 +31,7 @@ except Exception as e:
 def main():
     # Render the readme as markdown using st.markdown.
     readme_text = st.markdown(get_file_content_as_string("instructions.md"))
-
+    example_gif = st.image('results/example-results.gif')
     # Download external dependencies.
     for filename in EXTERNAL_DEPENDENCIES.keys():
         download_file(filename)
@@ -44,9 +44,11 @@ def main():
         st.sidebar.success('To continue select "Run the app".')
     elif app_mode == "Show the source code":
         readme_text.empty()
+        example_gif.empty()
         st.code(get_file_content_as_string("app.py"))
     elif app_mode == "Run the app":
         readme_text.empty()
+        example_gif.empty()
         run_the_app()
 
 # This file downloader demonstrates Streamlit animation.
