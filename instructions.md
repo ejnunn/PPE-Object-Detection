@@ -8,7 +8,7 @@ This project was created using the [Streamlit demo-self-driving](https://github.
 
 This gif shows example results when the object detection model is used on a video
 
-![example video results](https://media1.giphy.com/media/Ih0gygtS1MdK2yDHKo/giphy.gif)
+![](results/example-results.gif)
 
 Please see my [GitHub page](https://github.com/ejnunn/).
 
