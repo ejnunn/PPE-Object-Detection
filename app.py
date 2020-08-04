@@ -31,8 +31,7 @@ except Exception as e:
 def main():
     # Render the readme as markdown using st.markdown.
     readme_text = st.markdown(get_file_content_as_string("instructions.md"))
-    #example_gif = st.image('results/example-results.gif')
-    example_gif = st.empty()
+
     # Download external dependencies.
     for filename in EXTERNAL_DEPENDENCIES.keys():
         download_file(filename)
@@ -40,17 +39,18 @@ def main():
     # Once we have the dependencies, add a selector for the app mode on the sidebar.
     st.sidebar.title("What to do")
     app_mode = st.sidebar.selectbox("Choose the app mode",
-        ["Show instructions", "Run the app", "Show the source code"])
-    if app_mode == "Show instructions":
+        ["Show overview", "Run the app", "Example video results", "Show the source code"])
+    if app_mode == "Show overview":
         st.sidebar.success('To continue select "Run the app".')
     elif app_mode == "Show the source code":
         readme_text.empty()
-        example_gif.empty()
         st.code(get_file_content_as_string("app.py"))
     elif app_mode == "Run the app":
         readme_text.empty()
-        example_gif.empty()
         run_the_app()
+    elif app_mode == "Example video results":
+        readme_text.empty()
+        example_video_results()
 
 # This file downloader demonstrates Streamlit animation.
 def download_file(file_path):
@@ -126,11 +126,11 @@ def run_the_app():
     confidence_threshold, overlap_threshold = object_detector_ui()
 
     # Load the image from file.
-    image_url = os.path.join(DATA_URL_ROOT + 'obj/', selected_frame)
+    image_url = os.path.join(TRAIN_DATA_URL_ROOT + 'obj/', selected_frame)
     image = load_image(image_url)
+
     # Add boxes for objects on the image. These are the boxes for the ground image.
     boxes = metadata[metadata['image'] == selected_frame].drop(columns=["image"])
-
     draw_image_with_boxes(image, boxes, "Ground Truth",
         "**Human-annotated data** (image `%i`)" % selected_frame_index)
 
@@ -147,6 +147,25 @@ def run_the_app():
         display_metadata_state = st.write('## Metadata', metadata[:1000], '## Summary', summary[:1000])
     if display_boxes:
         st.write('## Bounding Boxes', boxes)
+
+def example_video_results():
+    # Draw the UI element to select an image to view
+    selected_frame = st.sidebar.slider('Choose and image (index)', 1, 200, 1)
+
+    # Draw the UI element to select parameters for the YOLO object detector.
+    confidence_threshold, overlap_threshold = object_detector_ui()
+
+    # Load the image from file.
+    image_url = os.path.join(TEST_DATA_URL_ROOT, 'frame-' + str(selected_frame).zfill(3) + '.jpg')
+    st.write(image_url)
+    image = load_image(image_url)
+
+    # Get the boxes for the objects detected by YOLO by running the YOLO model.
+    yolo_boxes = yolo_v3(image, confidence_threshold, overlap_threshold)
+    st.write(yolo_boxes)
+    draw_image_with_boxes(image, yolo_boxes, "Real-time Computer Vision",
+        "**YOLO v3 Model** (overlap `%3.1f`) (confidence `%3.1f`)" % (overlap_threshold, confidence_threshold))
+
 
 # This sidebar UI is a little search engine to find certain object types.
 def frame_selector_ui(summary):
@@ -186,8 +205,8 @@ def get_selected_frames(summary, label, min_elts, max_elts):
 # This sidebar UI lets the user select parameters for the YOLO object detector.
 def object_detector_ui():
     st.sidebar.markdown("# Model")
-    confidence_threshold = st.sidebar.slider("Confidence threshold", 0.0, 1.0, 0.5, 0.01)
-    overlap_threshold = st.sidebar.slider("Overlap threshold", 0.0, 1.0, 0.3, 0.01)
+    confidence_threshold = st.sidebar.slider("Confidence threshold", 0.0, 1.0, 0.3, 0.01)
+    overlap_threshold = st.sidebar.slider("Overlap threshold", 0.0, 1.0, 0.2, 0.01)
     return confidence_threshold, overlap_threshold
 
 # Draws an image with boxes overlayed to indicate the presence of PPE, people etc.
@@ -198,7 +217,8 @@ def draw_image_with_boxes(image, boxes, header, description):
         "Safety Vest": [255, 0, 0]  # red
     }
     image_with_boxes = image.astype(np.float64)
-    for _, (label, xmin, xmax, ymin, ymax) in boxes.iterrows():
+    for _, (xmin, xmax, ymin, ymax, label) in boxes.iterrows():
+        print((label, xmin, xmax, ymin, ymax))
         image_with_boxes[int(ymin):int(ymax),int(xmin):int(xmax),:] += LABEL_COLORS[label]
         image_with_boxes[int(ymin):int(ymax),int(xmin):int(xmax),:] /= 2
 
@@ -277,12 +297,13 @@ def yolo_v3(image, confidence_threshold, overlap_threshold):
             ymax.append(y+h)
             labels.append(label)
 
-    boxes = pd.DataFrame({"xmin": xmin, "ymin": ymin, "xmax": xmax, "ymax": ymax, "labels": labels})
-    return boxes[["xmin", "ymin", "xmax", "ymax", "labels"]]
+    boxes = pd.DataFrame({"xmin": xmin, "ymin": ymin, "xmax": xmax, "ymax": ymax, "label": labels})
+    return boxes[["xmin", "ymin", "xmax", "ymax", "label"]]
 
 
 # Path to the Streamlit public S3 bucket
-DATA_URL_ROOT = "./original_data/"
+TRAIN_DATA_URL_ROOT = "./train_data/"
+TEST_DATA_URL_ROOT = "./test_data/"
 
 # External files to download.
 EXTERNAL_DEPENDENCIES = {}
