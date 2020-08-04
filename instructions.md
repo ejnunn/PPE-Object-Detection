@@ -8,5 +8,5 @@ This project was created using the [Streamlit demo-self-driving](https://github.
 
 ### Questions? Comments?
 
-Please ask in the [Streamlit community](https://discuss.streamlit.io).
+Please see my [GitHub page](https://github.com/ejnunn/).
 
