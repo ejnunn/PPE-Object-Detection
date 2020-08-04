@@ -12,7 +12,8 @@ One potential application of this model would be to detect if construction worke
 
 ## Contact Me
 
-[GitHub](https://github.com/ejnunn/).
-[LinkedIn](https://linkedin.com/eric-j-nunn/)
+[Email](ejnunn1@msn.com)
 
-👈 **Please select _Run the App_ in the sidebar to start.**
+[GitHub](https://github.com/ejnunn/)
+
+[LinkedIn](https://linkedin.com/eric-j-nunn/)
