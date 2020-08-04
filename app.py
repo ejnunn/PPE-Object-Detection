@@ -31,7 +31,8 @@ except Exception as e:
 def main():
     # Render the readme as markdown using st.markdown.
     readme_text = st.markdown(get_file_content_as_string("instructions.md"))
-    example_gif = st.image('results/example-results.gif')
+    #example_gif = st.image('results/example-results.gif')
+    example_gif = st.empty()
     # Download external dependencies.
     for filename in EXTERNAL_DEPENDENCIES.keys():
         download_file(filename)
