@@ -39,7 +39,7 @@ def main():
     # Once we have the dependencies, add a selector for the app mode on the sidebar.
     st.sidebar.title("What to do")
     app_mode = st.sidebar.selectbox("Choose the app mode",
-        ["Show overview", "Run the app", "Example video results", "Show the source code"])
+        ["Show overview", "Run the app", "Show the source code"])
     if app_mode == "Show overview":
         st.sidebar.success('To continue select "Run the app".')
     elif app_mode == "Show the source code":
@@ -48,9 +48,6 @@ def main():
     elif app_mode == "Run the app":
         readme_text.empty()
         run_the_app()
-    elif app_mode == "Example video results":
-        readme_text.empty()
-        example_video_results()
 
 # This file downloader demonstrates Streamlit animation.
 def download_file(file_path):
@@ -92,7 +89,15 @@ def download_file(file_path):
 
 # This is the main app app itself, which appears when the user selects "Run the app".
 def run_the_app():
-    
+    dataset = st.sidebar.selectbox('Select dataset', ['Training Data', 'Testing Data', 'Upload Image'])
+    if dataset == 'Training Data':
+        run_on_training_data()
+    elif dataset == 'Testing Data':
+        run_on_testing_data()
+    elif dataset == 'Upload Image':
+        run_on_upload()
+
+def run_on_training_data():
     # To make Streamlit fast, st.cache allows us to reuse computation across runs.
     # In this common pattern, we download data from an endpoint only once.
     @st.cache
@@ -120,8 +125,6 @@ def run_the_app():
     if selected_frame_index == None:
         st.error("No frames fit the criteria. Please select different label or number.")
         return
-    else:
-        st.write(selected_frame)
 
     # Draw the UI element to select parameters for the YOLO object detector.
     confidence_threshold, overlap_threshold = object_detector_ui()
@@ -133,7 +136,7 @@ def run_the_app():
     # Add boxes for objects on the image. These are the boxes for the ground image.
     boxes = metadata[metadata['image'] == selected_frame].drop(columns=["image"])
     draw_image_with_boxes(image, boxes, "Ground Truth",
-        "**Human-annotated data** (image `%i`)" % selected_frame_index)
+        "**Human-annotated data** (image `%s`)" % selected_frame)
 
     # Get the boxes for the objects detected by YOLO by running the YOLO model.
     yolo_boxes = yolo_v3(image, confidence_threshold, overlap_threshold)
@@ -149,7 +152,7 @@ def run_the_app():
     if display_boxes:
         st.write('## Bounding Boxes', boxes)
 
-def example_video_results():
+def run_on_testing_data():
     # Draw the UI element to select an image to view
     selected_frame = st.sidebar.slider('Choose and image (index)', 1, 200, 1)
 
@@ -158,15 +161,29 @@ def example_video_results():
 
     # Load the image from file.
     image_url = os.path.join(TEST_DATA_URL_ROOT, 'frame-' + str(selected_frame).zfill(3) + '.jpg')
-    st.write(image_url)
     image = load_image(image_url)
 
     # Get the boxes for the objects detected by YOLO by running the YOLO model.
     yolo_boxes = yolo_v3(image, confidence_threshold, overlap_threshold)
-    st.write(yolo_boxes)
     draw_image_with_boxes(image, yolo_boxes, "Real-time Computer Vision",
         "**YOLO v3 Model** (overlap `%3.1f`) (confidence `%3.1f`)" % (overlap_threshold, confidence_threshold))
 
+def run_on_upload():
+    # Draw the UI element to select an image to view
+    uploaded_image = st.sidebar.file_uploader('Upload an image', type='jpg')
+
+    # Draw the UI element to select parameters for the YOLO object detector.
+    confidence_threshold, overlap_threshold = object_detector_ui()
+
+    # Load the image from file.
+    #image = load_image(uploaded_image)
+    file_bytes = np.asarray(bytearray(uploaded_image.read()), dtype=np.uint8)
+    image = cv2.cvtColor(cv2.imdecode(file_bytes, cv2.COLOR_BGR2RGB), cv2.COLOR_BGR2RGB)
+    
+    # Get the boxes for the objects detected by YOLO by running the YOLO model.
+    yolo_boxes = yolo_v3(image, confidence_threshold, overlap_threshold)
+    draw_image_with_boxes(image, yolo_boxes, "Real-time Computer Vision",
+        "**YOLO v3 Model** (overlap `%3.1f`) (confidence `%3.1f`)" % (overlap_threshold, confidence_threshold))
 
 # This sidebar UI is a little search engine to find certain object types.
 def frame_selector_ui(summary):
@@ -214,7 +231,7 @@ def object_detector_ui():
 def draw_image_with_boxes(image, boxes, header, description):
     # Superpose the semi-transparent object detection boxes.    # Colors for the boxes
     LABEL_COLORS = {
-        "Hard Hat": [0, 255, 0],     # green
+        "Hard Hat": [0, 255, 0],    # green
         "Safety Vest": [255, 0, 0]  # red
     }
     image_with_boxes = image.astype(np.float64)
@@ -226,6 +243,7 @@ def draw_image_with_boxes(image, boxes, header, description):
     st.subheader(header)
     st.markdown(description)
     st.image(image_with_boxes.astype(np.uint8), use_column_width=True)
+    st.write('Bounding Box Coordinates', boxes)
 
 # Download a single file and make its content available as a string.
 @st.cache(show_spinner=False)
