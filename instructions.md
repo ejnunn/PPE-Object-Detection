@@ -6,6 +6,8 @@ This project demonstrates the [YOLO object detection](https://pjreddie.com/darkn
 
 This project was created using the [Streamlit demo-self-driving](https://github.com/streamlit/demo-self-driving) as a template. The image dataset and neural network have been modified for the specific application of detecting PPE.
 
+The neural network model was trained using [Google Colab](https://colab.research.google.com/) to take advantage of the free GPU acceleration.
+
 ## Example
 ![](https://raw.githubusercontent.com/ejnunn/PPE-Object-Detection/master/results/example-results.gif)
 

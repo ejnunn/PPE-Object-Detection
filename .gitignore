@@ -1,4 +1,4 @@
-/original_data/obj.zip
+/train_data/obj.zip
 yolov3_ppe2_last.weights
 yolov3.weights
 raw_data_from_labelbox.json

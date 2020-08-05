@@ -131,6 +131,8 @@ def run_the_app():
 
     # Add boxes for objects on the image. These are the boxes for the ground image.
     boxes = metadata[metadata['image'] == selected_frame].drop(columns=["image"])
+    st.write(boxes)
+    st.write(image.shape)
     draw_image_with_boxes(image, boxes, "Ground Truth",
         "**Human-annotated data** (image `%i`)" % selected_frame_index)
 
@@ -217,8 +219,7 @@ def draw_image_with_boxes(image, boxes, header, description):
         "Safety Vest": [255, 0, 0]  # red
     }
     image_with_boxes = image.astype(np.float64)
-    for _, (xmin, xmax, ymin, ymax, label) in boxes.iterrows():
-        print((label, xmin, xmax, ymin, ymax))
+    for _, (label, xmin, xmax, ymin, ymax) in boxes.iterrows():
         image_with_boxes[int(ymin):int(ymax),int(xmin):int(xmax),:] += LABEL_COLORS[label]
         image_with_boxes[int(ymin):int(ymax),int(xmin):int(xmax),:] /= 2
 
@@ -298,7 +299,7 @@ def yolo_v3(image, confidence_threshold, overlap_threshold):
             labels.append(label)
 
     boxes = pd.DataFrame({"xmin": xmin, "ymin": ymin, "xmax": xmax, "ymax": ymax, "label": labels})
-    return boxes[["xmin", "ymin", "xmax", "ymax", "label"]]
+    return boxes[["label", "xmin", "ymin", "xmax", "ymax"]]
 
 
 # Path to the Streamlit public S3 bucket
