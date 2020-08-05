@@ -92,6 +92,7 @@ def download_file(file_path):
 
 # This is the main app app itself, which appears when the user selects "Run the app".
 def run_the_app():
+    
     # To make Streamlit fast, st.cache allows us to reuse computation across runs.
     # In this common pattern, we download data from an endpoint only once.
     @st.cache
@@ -131,8 +132,6 @@ def run_the_app():
 
     # Add boxes for objects on the image. These are the boxes for the ground image.
     boxes = metadata[metadata['image'] == selected_frame].drop(columns=["image"])
-    st.write(boxes)
-    st.write(image.shape)
     draw_image_with_boxes(image, boxes, "Ground Truth",
         "**Human-annotated data** (image `%i`)" % selected_frame_index)
 
