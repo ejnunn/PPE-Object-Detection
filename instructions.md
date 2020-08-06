@@ -11,15 +11,23 @@ Hosting this Streamlit app allows multiple stakeholders easily see their model's
 ## Example
 ![](https://raw.githubusercontent.com/ejnunn/PPE-Object-Detection/master/results/example-results.gif)
 
+This example was created using Google Colab to run YOLO on each frame individually. Post-processing software was used to stitch the frames back into a video format.
+
+The images generated in this Streamlit application use a different method to draw the object bounding boxes but the same neural network is used to make the predictions as the example video.
+
 ## Applications
 
-Keep employees safe in construction and manufacturing environments by determining if they are wearing the appropriate safety equipment to perform their jobs.
+Reduce workplace injuries in construction and manufacturing environments by determining if employees are wearing the appropriate safety equipment to perform their jobs.
 
 The model can be configured to detecting [foreign object debris (FOD)](https://en.wikipedia.org/wiki/Foreign_object_damage) to maintain a flightline or factory environment.
 
+## Future Work
+
+Implement an object tracking algorithm to lock on to specific objects and determine if the object is the same as the one present in the previous frame. This could be done by using the previous frame's data, computing the IOU (intersection over union) of object in the two frames, and make use of the linear sum assignment to assign a unique ID based on the least IOU.
+
 ## Contact Me
 
-### Eric Nunn
+Eric Nunn
 
 [Email](mailto:ejnunn1@msn.com) | [GitHub](https://github.com/ejnunn/) | [LinkedIn](https://linkedin.com/eric-j-nunn/)
 

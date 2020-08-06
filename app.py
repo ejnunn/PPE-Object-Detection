@@ -170,20 +170,21 @@ def run_on_testing_data():
 
 def run_on_upload():
     # Draw the UI element to select an image to view
-    uploaded_image = st.sidebar.file_uploader('Upload an image', type='jpg')
+    uploaded_image = st.file_uploader('Upload an image', type='jpg')
 
     # Draw the UI element to select parameters for the YOLO object detector.
     confidence_threshold, overlap_threshold = object_detector_ui()
 
-    # Load the image from file.
-    #image = load_image(uploaded_image)
-    file_bytes = np.asarray(bytearray(uploaded_image.read()), dtype=np.uint8)
-    image = cv2.cvtColor(cv2.imdecode(file_bytes, cv2.COLOR_BGR2RGB), cv2.COLOR_BGR2RGB)
-    
-    # Get the boxes for the objects detected by YOLO by running the YOLO model.
-    yolo_boxes = yolo_v3(image, confidence_threshold, overlap_threshold)
-    draw_image_with_boxes(image, yolo_boxes, "Real-time Computer Vision",
-        "**YOLO v3 Model** (overlap `%3.1f`) (confidence `%3.1f`)" % (overlap_threshold, confidence_threshold))
+    if uploaded_image != None:
+        # Load the image from file.
+        #image = load_image(uploaded_image)
+        file_bytes = np.asarray(bytearray(uploaded_image.read()), dtype=np.uint8)
+        image = cv2.cvtColor(cv2.imdecode(file_bytes, cv2.COLOR_BGR2RGB), cv2.COLOR_BGR2RGB)
+        
+        # Get the boxes for the objects detected by YOLO by running the YOLO model.
+        yolo_boxes = yolo_v3(image, confidence_threshold, overlap_threshold)
+        draw_image_with_boxes(image, yolo_boxes, "Real-time Computer Vision",
+            "**YOLO v3 Model** (overlap `%3.1f`) (confidence `%3.1f`)" % (overlap_threshold, confidence_threshold))
 
 # This sidebar UI is a little search engine to find certain object types.
 def frame_selector_ui(summary):
