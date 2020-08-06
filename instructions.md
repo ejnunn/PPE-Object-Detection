@@ -19,8 +19,8 @@ The model can be configured to detecting [foreign object debris (FOD)](https://e
 
 ## Contact Me
 
-![](https://raw.githubusercontent.com/ejnunn/PPE-Object-Detection/master/images/profile-thumbnail.jpg)
-
 ### Eric Nunn
 
 [Email](mailto:ejnunn1@msn.com) | [GitHub](https://github.com/ejnunn/) | [LinkedIn](https://linkedin.com/eric-j-nunn/)
+
+![](https://raw.githubusercontent.com/ejnunn/PPE-Object-Detection/master/images/profile-thumbnail.jpg)
