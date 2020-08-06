@@ -27,7 +27,7 @@ Implement an object tracking algorithm to lock on to specific objects and determ
 
 ## Contact Me
 
-Eric Nunn
+**Eric Nunn**
 
 [Email](mailto:ejnunn1@msn.com) | [GitHub](https://github.com/ejnunn/) | [LinkedIn](https://linkedin.com/eric-j-nunn/)
 
