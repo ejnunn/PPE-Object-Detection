@@ -331,20 +331,16 @@ TRAIN_DATA_URL_ROOT = "./train_data/"
 TEST_DATA_URL_ROOT = "./test_data/"
 
 # External files to download.
-EXTERNAL_DEPENDENCIES = {}
-#    "yolov3.weights": {
-#        "url": "https://pjreddie.com/media/files/yolov3.weights",
-#        "size": 248007048
-#    },
-#    "yolov3.cfg": {
-#        "url": "https://raw.githubusercontent.com/pjreddie/darknet/master/cfg/yolov3.cfg",
-#        "size": 8342
-#    },
-#    "yolov3-ppe.cfg": {
-#        "url": "https://raw.githubusercontent.com/ejnunn/PPE-Object-Detection/master/yolov3-ppe.cfg",
-#        "size": 8336
-#    }
-#}
+EXTERNAL_DEPENDENCIES = {
+    "yolov3_ppe2_last.weights": {
+        "url": "https://yolov3-ppe2.s3.amazonaws.com/yolov3_ppe2_last.weights",
+        "size": 246326928
+    },
+    "yolov3_ppe2.cfg": {
+        "url": "https://raw.githubusercontent.com/ejnunn/PPE-Object-Detection/master/yolov3-ppe.cfg",
+        "size": 8336
+    }
+}
 
 if __name__ == "__main__":
     main()
