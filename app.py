@@ -91,18 +91,18 @@ def download_file(file_path):
 def run_the_app():
     dataset = st.sidebar.selectbox('Select dataset', ['Training Data', 'Testing Data', 'Upload Image'])
     if dataset == 'Training Data':
-        run_on_training_data()
+        run_on_data(TRAIN_DATA_URL_ROOT)
     elif dataset == 'Testing Data':
-        run_on_testing_data()
+        run_on_data(TEST_DATA_URL_ROOT)
     elif dataset == 'Upload Image':
         run_on_upload()
 
-def run_on_training_data():
+def run_on_data(data_path):
     # To make Streamlit fast, st.cache allows us to reuse computation across runs.
     # In this common pattern, we download data from an endpoint only once.
     @st.cache
-    def load_metadata(url):
-        return pd.read_csv(url)
+    def load_metadata(filepath):
+        return pd.read_csv(filepath)
 
     # This function uses some Pandas magic to summarize the metadata Dataframe.
     @st.cache
@@ -117,26 +117,31 @@ def run_on_training_data():
     # An amazing property of st.cached functions is that you can pipe them into
     # one another to form a computation DAG (directed acyclic graph). Streamlit
     # recomputes only whatever subset is required to get the right answer!
-    metadata = load_metadata("labels.csv")
+    metadata = load_metadata(data_path + "labels.csv")
     summary = create_summary(metadata)
 
     # Draw the UI elements to search for objects (pedestrians, cars, etc.)
-    selected_frame_index, selected_frame = frame_selector_ui(summary)
-    if selected_frame_index == None:
-        st.error("No frames fit the criteria. Please select different label or number.")
-        return
+    #selected_frame_index, selected_frame = frame_selector_ui(summary)
+    #if selected_frame_index == None:
+    #    st.error("No frames fit the criteria. Please select different label or number.")
+    #    return
+
+    # Draw the UI element to select an image to view
+    total_frames = len(os.listdir(data_path + 'obj/'))
+    selected_frame = st.sidebar.slider('Choose and image (index)', 1, total_frames, 1)
 
     # Draw the UI element to select parameters for the YOLO object detector.
     confidence_threshold, overlap_threshold = object_detector_ui()
 
     # Load the image from file.
-    image_url = os.path.join(TRAIN_DATA_URL_ROOT + 'obj/', selected_frame)
+    image_url = os.path.join(data_path + 'obj/', 'frame-' + str(selected_frame).zfill(3) + '.jpg')
+    st.write(image_url)
     image = load_image(image_url)
 
-    # Add boxes for objects on the image. These are the boxes for the ground image.
-    boxes = metadata[metadata['image'] == selected_frame].drop(columns=["image"])
-    draw_image_with_boxes(image, boxes, "Ground Truth",
-        "**Human-annotated data** (image `%s`)" % selected_frame)
+    ## Add boxes for objects on the image. These are the boxes for the ground image.
+    #boxes = metadata[metadata['image'] == selected_frame].drop(columns=["image"])
+    #draw_image_with_boxes(image, boxes, "Ground Truth",
+    #    "**Human-annotated data** (image `%s`)" % selected_frame)
 
     # Get the boxes for the objects detected by YOLO by running the YOLO model.
     yolo_boxes = yolo_v3(image, confidence_threshold, overlap_threshold)
@@ -145,6 +150,7 @@ def run_on_training_data():
 
     # Draw the UI elements for metadata details
     st.sidebar.subheader('Metadata Details')
+
     display_metadata = st.sidebar.checkbox('Show metadata and summary')
     display_boxes = st.sidebar.checkbox('Show bounding box coordinates') 
     if display_metadata:
@@ -152,7 +158,7 @@ def run_on_training_data():
     if display_boxes:
         st.write('## Bounding Boxes', boxes)
 
-def run_on_testing_data():
+def run_on_test_data(data_path):
     # Draw the UI element to select an image to view
     selected_frame = st.sidebar.slider('Choose and image (index)', 1, 200, 1)
 
