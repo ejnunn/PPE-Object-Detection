@@ -2,11 +2,10 @@
 
 ## Background
 
-This project demonstrates the [YOLOv3 object detection](https://pjreddie.com/publications/) technology using a custom dataset of images containing safety vests and hard hats, packaged into an interactive [Streamlit](https://streamlit.io) app. The neural network was trained using transfer learning by using pre-trained weights from [Darknet YOLOv3](https://pjreddie.com/darknet/yolo/)
+This project demonstrates the [YOLOv3 object detection](https://pjreddie.com/publications/) technology using a custom dataset of images containing safety vests and hard hats, packaged into an interactive [Streamlit](https://streamlit.io) app. This project was created using the [Streamlit demo-self-driving](https://github.com/streamlit/demo-self-driving) as a template.
+The neural network was trained using transfer learning by using pre-trained weights from [Darknet YOLOv3](https://pjreddie.com/darknet/yolo/). Model training was performed using [Google Colab](https://colab.research.google.com/) to take advantage of the free GPU acceleration.
 
-This project was created using the [Streamlit demo-self-driving](https://github.com/streamlit/demo-self-driving) as a template. The neural network model was trained using [Google Colab](https://colab.research.google.com/) to take advantage of the free GPU acceleration.
-
-Hosting this Streamlit app allows multiple stakeholders easily see their model's performance without programming.
+Streamlit allows this data science applicaton to be easily viewed by multiple stakeholders to visualize their model's performance without knowing how to code.
 
 ## Example
 ![](https://raw.githubusercontent.com/ejnunn/PPE-Object-Detection/master/results/example-results.gif)
