@@ -1,5 +1,5 @@
 # Object Detection Image Browser:
-## Personal Protective Equipment
+Personal Protective Equipment
 
 ## Background
 
