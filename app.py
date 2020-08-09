@@ -26,6 +26,7 @@ try:
     import cv2
 except Exception as e:
     print(e)
+st.set_option('deprecation.showfileUploaderEncoding', False)
 
 # Streamlit encourages well-structured code, like starting execution in a main() function.
 def main():
@@ -89,13 +90,14 @@ def download_file(file_path):
 
 # This is the main app app itself, which appears when the user selects "Run the app".
 def run_the_app():
-    dataset = st.sidebar.selectbox('Select dataset', ['Training Data', 'Testing Data', 'Upload Image'])
-    if dataset == 'Training Data':
+    dataset = st.sidebar.selectbox('Select dataset', ['Upload Image', 'Training Data', 'Testing Data'])
+    if dataset == 'Upload Image':
+        run_on_upload()
+    elif dataset == 'Training Data':
         run_on_data(TRAIN_DATA_URL_ROOT)
     elif dataset == 'Testing Data':
         run_on_data(TEST_DATA_URL_ROOT)
-    elif dataset == 'Upload Image':
-        run_on_upload()
+    
 
 def run_on_data(data_path):
     # To make Streamlit fast, st.cache allows us to reuse computation across runs.
