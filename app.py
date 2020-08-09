@@ -90,6 +90,7 @@ def download_file(file_path):
 
 # This is the main app app itself, which appears when the user selects "Run the app".
 def run_the_app():
+    # Select which images you want to run the inference on
     dataset = st.sidebar.selectbox('Select dataset', ['Upload Image', 'Training Data', 'Testing Data'])
     if dataset == 'Upload Image':
         run_on_upload()
@@ -159,22 +160,6 @@ def run_on_data(data_path):
         display_metadata_state = st.write('## Metadata', metadata[:1000], '## Summary', summary[:1000])
     if display_boxes:
         st.write('## Bounding Boxes', boxes)
-
-def run_on_test_data(data_path):
-    # Draw the UI element to select an image to view
-    selected_frame = st.sidebar.slider('Choose and image (index)', 1, 200, 1)
-
-    # Draw the UI element to select parameters for the YOLO object detector.
-    confidence_threshold, overlap_threshold = object_detector_ui()
-
-    # Load the image from file.
-    image_url = os.path.join(TEST_DATA_URL_ROOT, 'frame-' + str(selected_frame).zfill(3) + '.jpg')
-    image = load_image(image_url)
-
-    # Get the boxes for the objects detected by YOLO by running the YOLO model.
-    yolo_boxes = yolo_v3(image, confidence_threshold, overlap_threshold)
-    draw_image_with_boxes(image, yolo_boxes, "Real-time Computer Vision",
-        "**YOLO v3 Model** (overlap `%3.1f`) (confidence `%3.1f`)" % (overlap_threshold, confidence_threshold))
 
 def run_on_upload():
     # Draw the UI element to select an image to view
