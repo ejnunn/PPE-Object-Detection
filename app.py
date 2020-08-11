@@ -142,10 +142,12 @@ def run_on_data(data_path):
     image = load_image(image_url)
 
     ## Add boxes for objects on the image. These are the boxes for the ground image.
-    #boxes = metadata[metadata['image'] == selected_frame].drop(columns=["image"])
-    #draw_image_with_boxes(image, boxes, "Ground Truth",
-    #    "**Human-annotated data** (image `%s`)" % selected_frame)
-
+    try:
+        boxes = metadata[metadata['image'] == 'frame-' + str(selected_frame).zfill(3) + '.jpg'].drop(columns=["image"])
+        draw_image_with_boxes(image, boxes, "Ground Truth",
+            "**Human-annotated data** (image `%s`)" % selected_frame)
+    except:
+        pass
     # Get the boxes for the objects detected by YOLO by running the YOLO model.
     yolo_boxes = yolo_v3(image, confidence_threshold, overlap_threshold)
     draw_image_with_boxes(image, yolo_boxes, "Real-time Computer Vision",
@@ -281,8 +283,8 @@ def yolo_v3(image, confidence_threshold, overlap_threshold):
             if confidence > confidence_threshold:
                 box = detection[0:4] * np.array([W, H, W, H])
                 centerX, centerY, width, height = box.astype("int")
-                x, y = int(centerX - (width / 2)), int(centerY - (height / 2))
-                boxes.append([x, y, int(width), int(height)])
+                x1, y1 = int(centerX - (width / 2)), int(centerY - (height / 2))
+                boxes.append([x1, y1, int(width), int(height)])
                 confidences.append(float(confidence))
                 class_IDs.append(classID)
     indices = cv2.dnn.NMSBoxes(boxes, confidences, confidence_threshold, overlap_threshold)
@@ -301,16 +303,16 @@ def yolo_v3(image, confidence_threshold, overlap_threshold):
                 continue
 
             # extract the bounding box coordinates
-            x, y, w, h = boxes[i][0], boxes[i][1], boxes[i][2], boxes[i][3]
+            x1, y1, w, h = boxes[i][0], boxes[i][1], boxes[i][2], boxes[i][3]
 
-            xmin.append(x)
-            ymin.append(y)
-            xmax.append(x+w)
-            ymax.append(y+h)
+            xmin.append(x1)
+            ymin.append(y1)
+            xmax.append(x1+w)
+            ymax.append(y1+h)
             labels.append(label)
 
     boxes = pd.DataFrame({"xmin": xmin, "ymin": ymin, "xmax": xmax, "ymax": ymax, "label": labels})
-    return boxes[["label", "xmin", "ymin", "xmax", "ymax"]]
+    return boxes[["label", "xmin", "xmax", "ymin", "ymax"]]
 
 
 # Path to the Streamlit public S3 bucket
