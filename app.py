@@ -130,8 +130,8 @@ def run_on_data(data_path):
     #    return
 
     # Draw the UI element to select an image to view
-    total_frames = len(os.listdir(data_path + 'obj/'))
-    selected_frame = st.sidebar.slider('Choose and image (index)', 1, total_frames, 1)
+    total_frames = len([x for x in os.listdir(data_path + 'obj/') if x[-4:] == '.jpg'])
+    selected_frame = st.sidebar.slider('Choose an image (index)', 1, total_frames, 1)
 
     # Draw the UI element to select parameters for the YOLO object detector.
     confidence_threshold, overlap_threshold = object_detector_ui()
@@ -144,6 +144,7 @@ def run_on_data(data_path):
     ## Add boxes for objects on the image. These are the boxes for the ground image.
     try:
         boxes = metadata[metadata['image'] == 'frame-' + str(selected_frame).zfill(3) + '.jpg'].drop(columns=["image"])
+        min_max_boxes = boxes
         draw_image_with_boxes(image, boxes, "Ground Truth",
             "**Human-annotated data** (image `%s`)" % selected_frame)
     except:
