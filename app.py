@@ -221,8 +221,8 @@ def get_selected_frames(summary, label, min_elts, max_elts):
 # This sidebar UI lets the user select parameters for the YOLO object detector.
 def object_detector_ui():
     st.sidebar.markdown("# Model")
-    confidence_threshold = st.sidebar.slider("Confidence threshold", 0.0, 1.0, 0.3, 0.01)
-    overlap_threshold = st.sidebar.slider("Overlap threshold", 0.0, 1.0, 0.2, 0.01)
+    confidence_threshold = st.sidebar.slider("Confidence threshold", 0.0, 1.0, 0.75, 0.01)
+    overlap_threshold = st.sidebar.slider("Overlap threshold", 0.0, 1.0, 0.5, 0.01)
     return confidence_threshold, overlap_threshold
 
 # Draws an image with boxes overlayed to indicate the presence of PPE, people etc.
