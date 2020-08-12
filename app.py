@@ -141,7 +141,12 @@ def run_on_data(data_path):
     st.write(image_url)
     image = load_image(image_url)
 
-    ## Add boxes for objects on the image. These are the boxes for the ground image.
+    # Get the boxes for the objects detected by YOLO by running the YOLO model.
+    yolo_boxes = yolo_v3(image, confidence_threshold, overlap_threshold)
+    draw_image_with_boxes(image, yolo_boxes, "Real-time Computer Vision",
+        "**YOLO v3 Model** (overlap `%3.1f`) (confidence `%3.1f`)" % (overlap_threshold, confidence_threshold))
+
+    # Draw ground truth boxes on the image
     try:
         boxes = metadata[metadata['image'] == 'frame-' + str(selected_frame).zfill(3) + '.jpg'].drop(columns=["image"])
         min_max_boxes = boxes
@@ -149,10 +154,6 @@ def run_on_data(data_path):
             "**Human-annotated data** (image `%s`)" % selected_frame)
     except:
         pass
-    # Get the boxes for the objects detected by YOLO by running the YOLO model.
-    yolo_boxes = yolo_v3(image, confidence_threshold, overlap_threshold)
-    draw_image_with_boxes(image, yolo_boxes, "Real-time Computer Vision",
-        "**YOLO v3 Model** (overlap `%3.1f`) (confidence `%3.1f`)" % (overlap_threshold, confidence_threshold))
 
     # Draw the UI elements for metadata details
     st.sidebar.subheader('Metadata Details')
