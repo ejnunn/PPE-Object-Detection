@@ -138,7 +138,6 @@ def run_on_data(data_path):
 
     # Load the image from file.
     image_url = os.path.join(data_path + 'obj/', 'frame-' + str(selected_frame).zfill(3) + '.jpg')
-    st.write(image_url)
     image = load_image(image_url)
 
     # Get the boxes for the objects detected by YOLO by running the YOLO model.
