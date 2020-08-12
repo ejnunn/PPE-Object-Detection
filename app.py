@@ -91,7 +91,7 @@ def download_file(file_path):
 # This is the main app app itself, which appears when the user selects "Run the app".
 def run_the_app():
     # Select which images you want to run the inference on
-    dataset = st.sidebar.selectbox('Select dataset', ['Upload Image', 'Training Data', 'Testing Data'])
+    dataset = st.sidebar.selectbox('Select dataset', ['Training Data', 'Testing Data', 'Upload Image'])
     if dataset == 'Upload Image':
         run_on_upload()
     elif dataset == 'Training Data':
@@ -263,31 +263,34 @@ def yolo_v3(image, confidence_threshold, overlap_threshold):
     @st.cache(allow_output_mutation=True)
     def load_network(config_path, weights_path):
         net = cv2.dnn.readNetFromDarknet(config_path, weights_path)
-        output_layer_names = net.getLayerNames()
-        output_layer_names = [output_layer_names[i[0] - 1] for i in net.getUnconnectedOutLayers()]
-        return net, output_layer_names
-    net, output_layer_names = load_network("yolov3_ppe2.cfg", "yolov3_ppe2_last.weights")
+        layer_names = net.getLayerNames()
+        output_layers = [layer_names[i[0] - 1] for i in net.getUnconnectedOutLayers()]
+        return net, output_layers
+    net, output_layers = load_network("yolov3_ppe2.cfg", "yolov3_ppe2_last.weights")
 
     # Run the YOLO neural net.
-    blob = cv2.dnn.blobFromImage(image, 1 / 255.0, (416, 416), swapRB=True, crop=False)
+    blob = cv2.dnn.blobFromImage(image, 1 / 255.0, (416, 416), (0,0,0), swapRB=True, crop=False)
     net.setInput(blob)
-    layer_outputs = net.forward(output_layer_names)
+    layer_outputs = net.forward(output_layers)
 
     # Supress detections in case of too low confidence or too much overlap.
     boxes, confidences, class_IDs = [], [], []
     H, W = image.shape[:2]
-    for output in layer_outputs:
-        for detection in output:
+    for out in layer_outputs:
+        for detection in out:
             scores = detection[5:]
-            classID = np.argmax(scores)
-            confidence = scores[classID]
+            class_id = np.argmax(scores)
+            confidence = scores[class_id]
             if confidence > confidence_threshold:
-                box = detection[0:4] * np.array([W, H, W, H])
-                centerX, centerY, width, height = box.astype("int")
-                x1, y1 = int(centerX - (width / 2)), int(centerY - (height / 2))
-                boxes.append([x1, y1, int(width), int(height)])
+                center_x = int(detection[0] * W)
+                center_y = int(detection[1] * H)
+                w = int(detection[2] * W)
+                h = int(detection[3] * H)
+                x = int(center_x - w / 2)
+                y = int(center_y - h / 2)
+                class_IDs.append(class_id)
                 confidences.append(float(confidence))
-                class_IDs.append(classID)
+                boxes.append([x, y, w, h])
     indices = cv2.dnn.NMSBoxes(boxes, confidences, confidence_threshold, overlap_threshold)
 
     # Map from YOLO labels to PPE labels.
@@ -304,15 +307,15 @@ def yolo_v3(image, confidence_threshold, overlap_threshold):
                 continue
 
             # extract the bounding box coordinates
-            x1, y1, w, h = boxes[i][0], boxes[i][1], boxes[i][2], boxes[i][3]
-
+            box = boxes[i]
+            x1, y1, w, h = box[0], box[1], box[2], box[3]
             xmin.append(x1)
-            ymin.append(y1)
             xmax.append(x1+w)
+            ymin.append(y1)
             ymax.append(y1+h)
             labels.append(label)
 
-    boxes = pd.DataFrame({"xmin": xmin, "ymin": ymin, "xmax": xmax, "ymax": ymax, "label": labels})
+    boxes = pd.DataFrame({"label": labels, "xmin": xmin, "xmax": xmax, "ymin": ymin, "ymax": ymax})
     return boxes[["label", "xmin", "xmax", "ymin", "ymax"]]
 
 
