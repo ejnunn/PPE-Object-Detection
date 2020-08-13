@@ -8,6 +8,8 @@ The neural network was trained using transfer learning by using pre-trained weig
 
 Streamlit allows this data science applicaton to be easily viewed by multiple stakeholders to visualize their model's performance without knowing how to code.
 
+👈 **Please select _Run the App_ in the sidebar to start.**
+
 ## Example
 ![](https://raw.githubusercontent.com/ejnunn/PPE-Object-Detection/master/results/example-results.gif)
 
