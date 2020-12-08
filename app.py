@@ -326,7 +326,7 @@ TEST_DATA_URL_ROOT = "./test_data/"
 # External files to download.
 EXTERNAL_DEPENDENCIES = {
     "yolov3_ppe2_last.weights": {
-        "url": "https://ppe-object-detection.s3.us-east-2.amazonaws.com/yolov3_ppe2.cfg",
+        "url": "https://ppe-object-detection.s3.us-east-2.amazonaws.com/yolov3_ppe2_last.weights",
         "size": 246326928
     },
     "yolov3_ppe2.cfg": {
