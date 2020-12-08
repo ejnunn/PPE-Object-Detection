@@ -21,6 +21,7 @@ import pandas as pd
 import numpy as np
 import os, urllib
 import sys
+import cv2
 try:
     sys.path.append('/usr/local/lib64/python3.6/site-packages')
     import cv2
