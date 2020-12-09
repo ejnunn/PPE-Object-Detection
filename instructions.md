@@ -33,6 +33,6 @@ Implement an object tracking algorithm to lock on to specific objects and determ
 
 **Eric Nunn**
 
-[Email](mailto:ejnunn1@msn.com) | [GitHub](https://github.com/ejnunn/) | [LinkedIn](https://linkedin.com/eric-j-nunn/)
+[Email](mailto:ejnunn1@msn.com) | [GitHub](https://github.com/ejnunn/) | [LinkedIn](https://linkedin.com/in/eric-j-nunn/)
 
 ![](https://raw.githubusercontent.com/ejnunn/PPE-Object-Detection/master/images/profile-thumbnail.jpg)
